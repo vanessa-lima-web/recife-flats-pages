@@ -6,8 +6,8 @@ Catálogo de páginas estáticas do projeto **Recife Flats**.
 
 <table>
   <tr>
-    <td width="380">
-      <img src="images/01-obrigado-vip.png" width="360" alt="Obrigado VIP">
+    <td width="320">
+      <img src="images/01-obrigado-vip.png" width="300" alt="Obrigado VIP">
     </td>
     <td>
       <h3>1. Página de Obrigado VIP</h3>
@@ -21,8 +21,8 @@ Catálogo de páginas estáticas do projeto **Recife Flats**.
 
 <table>
   <tr>
-    <td width="380">
-      <img src="images/02-blog-apartamentos-temporada-recife.png" width="360" alt="Blog Apartamentos">
+    <td width="320">
+      <img src="images/02-blog-apartamentos-temporada-recife.png" width="300" alt="Blog Apartamentos">
     </td>
     <td>
       <h3>2. Modelo de Página de Blog</h3>
@@ -36,8 +36,8 @@ Catálogo de páginas estáticas do projeto **Recife Flats**.
 
 <table>
   <tr>
-    <td width="380">
-      <img src="images/03-documento-copilado.png" width="360" alt="Documento Compilado">
+    <td width="320">
+      <img src="images/03-documento-copilado.png" width="300" alt="Documento Compilado">
     </td>
     <td>
       <h3>3. Documento Compilado</h3>
