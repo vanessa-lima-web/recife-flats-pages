@@ -1,0 +1,3716 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=1.0, maximum-scale=3.0" />
+  <title>📋 GESTÃO DOCUMENTOS HÓSPEDES - OMIE (Otimizado Mobile)</title>
+  
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+  
+
+  
+  <!-- Bibliotecas JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
+  
+  <style>
+
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Space+Grotesk:wght@300;400;700&display=swap');
+
+/* ===== CSS VARIABLES ===== */
+:root {
+  --primary: #00ff88;
+  --secondary: #ff0080;
+  --accent: #00aaff;
+  --orange: #FF8C00;
+  --purple: #8A2BE2;
+  --bg-dark: #0a0a0a;
+  --bg-darker: #050505;
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --border: rgba(255, 255, 255, 0.1);
+  --success: #28a745;
+  --warning: #ffc107;
+  --danger: #dc3545;
+  --info: #17a2b8;
+  
+  /* Mobile spacing */
+  --mobile-padding: 16px;
+  --mobile-gap: 12px;
+  --desktop-padding: 20px;
+  --desktop-gap: 30px;
+  
+  /* Touch targets */
+  --touch-target: 44px;
+  --button-height: 48px;
+}
+
+/* ===== RESET & BASE ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+*:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: radial-gradient(circle at 20% 50%, #1a0033 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, #003d1a 0%, transparent 50%),
+              radial-gradient(circle at 40% 80%, #001a33 0%, transparent 50%),
+              linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+  min-height: 100vh;
+  color: var(--text-primary);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  z-index: -1;
+  animation: grid-move 20s linear infinite;
+}
+
+@keyframes grid-move {
+  0% { transform: translate(0,0); }
+  100% { transform: translate(50px,50px); }
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+  background: linear-gradient(135deg, #0e0e0e 0%, #1cd076 100%);
+  padding: 0;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(20px);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem var(--mobile-padding);
+  position: relative;
+}
+
+.logo {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.logo:hover {
+  opacity: 0.9;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.9rem;
+}
+
+.nav-links a:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
+  justify-content: center;
+  align-items: center;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background: white;
+  margin: 3px 0;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+.mobile-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.mobile-menu.active {
+  display: block;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-menu a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  padding: 1rem var(--mobile-padding);
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: var(--touch-target);
+}
+
+.mobile-menu a:last-child {
+  border-bottom: none;
+}
+
+.mobile-menu a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  padding-left: calc(var(--mobile-padding) + 0.5rem);
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: linear-gradient(145deg, rgba(0,255,136,0.1), rgba(0,170,255,0.1));
+  backdrop-filter: blur(20px);
+  border-bottom: 2px solid var(--primary);
+  padding: var(--desktop-padding);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  left: -100%;
+  background: linear-gradient(90deg, transparent, rgba(0,255,136,0.1), transparent);
+  animation: scan 3s ease-in-out infinite;
+}
+
+@keyframes scan {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.header h1 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  background: linear-gradient(45deg, var(--primary), var(--accent), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(0,255,136,0.3);
+  line-height: 1.2;
+}
+
+.header p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.header-stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--mobile-gap);
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.header-stats .stat-item {
+  background: rgba(255,255,255,0.05);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-direction: column;
+  text-align: center;
+  min-width: 80px;
+}
+
+.header-stats .stat-item i {
+  font-size: 1.2rem;
+  margin-bottom: 4px;
+}
+
+.header-stats .stat-label {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+/* ===== MAIN CONTAINER ===== */
+.main-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--mobile-padding);
+}
+
+.workflow-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--mobile-gap);
+  margin-bottom: var(--mobile-gap);
+}
+
+/* ===== CARDS ===== */
+.card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: var(--mobile-padding);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  margin-bottom: var(--mobile-gap);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(0,255,136,0.15);
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(45deg, var(--primary), var(--accent), var(--secondary), var(--primary));
+  border-radius: 18px;
+  opacity: 0.05;
+  z-index: -1;
+  animation: borderGlow 4s linear infinite;
+}
+
+@keyframes borderGlow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-icon {
+  background: linear-gradient(45deg, var(--primary), var(--accent));
+  color: var(--bg-dark);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.card-icon-orange {
+  background: linear-gradient(45deg, var(--orange), var(--warning));
+}
+
+.card-icon-purple {
+  background: linear-gradient(45deg, var(--purple), var(--secondary));
+}
+
+.card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1.3;
+}
+
+.card-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+/* ===== FORMS ===== */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--mobile-gap);
+  margin-bottom: var(--mobile-gap);
+}
+
+.form-group {
+  margin-bottom: var(--mobile-gap);
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  font-family: 'Space Grotesk', sans-serif;
+  min-height: var(--button-height);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,255,136,0.15);
+  background: rgba(255,255,255,0.08);
+}
+
+.form-control option {
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  padding: 8px;
+}
+
+/* ===== UPLOAD AREAS ===== */
+.upload-section {
+  margin-bottom: 16px;
+}
+
+.upload-area {
+  border: 3px dashed var(--primary);
+  border-radius: 12px;
+  padding: 24px 16px;
+  text-align: center;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background: linear-gradient(145deg, rgba(0,255,136,0.02), rgba(0,255,136,0.01));
+  position: relative;
+  overflow: hidden;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.upload-area:hover {
+  border-color: var(--accent);
+  background: rgba(0,170,255,0.05);
+  transform: translateY(-2px);
+}
+
+.upload-area.dragover {
+  border-color: var(--secondary);
+  background: rgba(255,0,128,0.1);
+  transform: scale(1.02);
+}
+
+.upload-area.fnrh {
+  border-color: var(--orange);
+}
+
+.upload-area.fnrh:hover {
+  border-color: var(--warning);
+  background: rgba(255,193,7,0.05);
+}
+
+.upload-area.documents {
+  border-color: var(--purple);
+}
+
+.upload-area.documents:hover {
+  border-color: var(--secondary);
+  background: rgba(138,43,226,0.05);
+}
+
+.upload-icon {
+  font-size: 2.2rem;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.upload-text {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.upload-hint {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.upload-divider {
+  text-align: center;
+  margin: 16px 0;
+  position: relative;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.upload-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border);
+  z-index: -1;
+}
+
+.upload-divider span {
+  background: var(--bg-dark);
+  padding: 0 12px;
+}
+
+/* ===== FILE LISTS ===== */
+.file-list {
+  margin-top: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.file-item {
+  background: rgba(0,255,136,0.1);
+  border: 1px solid rgba(0,255,136,0.3);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: all 0.3s ease;
+  gap: 12px;
+}
+
+.file-item:hover {
+  background: rgba(0,255,136,0.15);
+  transform: translateX(2px);
+}
+
+.file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  word-break: break-all;
+  line-height: 1.3;
+}
+
+.file-details {
+  display: flex;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+
+.file-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: var(--bg-dark);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'JetBrains Mono', monospace;
+  position: relative;
+  overflow: hidden;
+  min-height: var(--button-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  left: -100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(0,255,136,0.4);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--danger), #c82333);
+  color: #fff;
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, var(--warning), #e0a800);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--success), #218838);
+  color: #fff;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #0056b3);
+  color: #fff;
+}
+
+.btn-lg {
+  padding: 16px 24px;
+  font-size: 1rem;
+  min-height: 56px;
+}
+
+.btn-block {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.btn-omie {
+  background: linear-gradient(135deg, #4a90e2, #357abd);
+  color: #fff;
+  font-size: 1rem;
+  padding: 16px 24px;
+}
+
+/* ===== PROGRESS ===== */
+.progress-container {
+  margin: 20px 0;
+  display: none;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  width: 0%;
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.progress-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: progress-shine 2s ease-in-out infinite;
+}
+
+@keyframes progress-shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.progress-text {
+  text-align: center;
+  margin-top: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* ===== MESSAGES ===== */
+.message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 12px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  display: none;
+  position: relative;
+  overflow: hidden;
+  border-left: 4px solid;
+}
+
+.message.success {
+  background: rgba(40,167,69,0.1);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.message.error {
+  background: rgba(220,53,69,0.1);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.message.warning {
+  background: rgba(255,193,7,0.1);
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+.message.info {
+  background: rgba(23,162,184,0.1);
+  border-color: var(--info);
+  color: var(--info);
+}
+
+/* ===== PREVIEW ===== */
+.preview-section {
+  background: linear-gradient(135deg, rgba(0,170,255,0.1), rgba(138,43,226,0.1));
+  border: 1px solid rgba(0,170,255,0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+  display: none;
+}
+
+.preview-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preview-filename {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  background: rgba(0,0,0,0.3);
+  padding: 12px;
+  border-radius: 6px;
+  word-break: break-all;
+  border: 1px dashed var(--accent);
+  line-height: 1.4;
+}
+
+/* ===== SUMMARY ===== */
+.summary-section {
+  background: linear-gradient(135deg, rgba(0,255,136,0.05), rgba(0,170,255,0.05));
+  border: 2px solid var(--primary);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.summary-section h3 {
+  text-align: center;
+  color: var(--primary);
+  margin-bottom: 16px;
+  font-size: 1.2rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.summary-item {
+  text-align: center;
+  padding: 12px 8px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.summary-number {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--primary);
+  font-family: 'JetBrains Mono', monospace;
+  display: block;
+  line-height: 1.2;
+}
+
+.summary-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  line-height: 1.2;
+}
+
+.summary-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ===== OMIE SECTION ===== */
+.omie-section {
+  background: linear-gradient(135deg, rgba(74,144,226,0.1), rgba(53,122,189,0.1));
+  border: 2px dashed #4a90e2;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.omie-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #4a90e2;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.omie-instructions {
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+.omie-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.omie-feature {
+  background: rgba(74,144,226,0.1);
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.omie-feature i {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  background: linear-gradient(135deg, var(--bg-dark) 0%, #1e293b 100%);
+  color: var(--text-primary);
+  margin-top: 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 80px; /* Space for FABs */
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px var(--mobile-padding) 16px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.footer-section h4 {
+  color: #fbbf24;
+  margin-bottom: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 8px;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  padding: 4px 0;
+  min-height: var(--touch-target);
+}
+
+.footer-links a:hover {
+  color: #fbbf24;
+  padding-left: 8px;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.quick-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.quick-stats .stat-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  flex: 1;
+  min-width: 80px;
+  max-width: 120px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.quick-stats .stat-number {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fbbf24;
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.quick-stats .stat-label {
+  font-size: 0.7rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* ===== FLOATING ACTION BUTTONS (FABs) ===== */
+.fab-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 1000;
+}
+
+.fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.fab:hover {
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.fab:active {
+  transform: translateY(0) scale(1);
+}
+
+.fab-reset {
+  background: linear-gradient(135deg, var(--danger), #c82333);
+  color: white;
+}
+
+.fab-help {
+  background: linear-gradient(135deg, var(--info), #0056b3);
+  color: white;
+}
+
+/* ===== LOADING OVERLAY ===== */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  text-align: center;
+  color: var(--text-primary);
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* ===== SCROLLBAR CUSTOMIZATION ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-darker);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--primary), var(--accent));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(var(--accent), var(--primary));
+}
+
+/* ===== UTILITIES ===== */
+.text-center {
+  text-align: center;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablets em retrato */
+@media (min-width: 768px) {
+  :root {
+    --mobile-padding: var(--desktop-padding);
+    --mobile-gap: 20px;
+  }
+
+  .nav-container {
+    padding: 1rem var(--desktop-padding);
+  }
+
+  .logo {
+    font-size: 1.5rem;
+  }
+
+  .nav-links {
+    gap: 2rem;
+  }
+
+  .nav-links a {
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+  }
+
+  .header h1 {
+    font-size: 2.3rem;
+  }
+
+  .header p {
+    font-size: 1.05rem;
+  }
+
+  .header-stats {
+    gap: var(--desktop-gap);
+  }
+
+  .header-stats .stat-item {
+    flex-direction: row;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    min-width: 140px;
+  }
+
+  .header-stats .stat-item i {
+    margin-bottom: 0;
+    margin-right: 8px;
+  }
+
+  .workflow-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--desktop-gap);
+  }
+
+  .form-row {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .upload-area {
+    padding: 30px 20px;
+    min-height: 140px;
+  }
+
+  .upload-icon {
+    font-size: 2.6rem;
+  }
+
+  .upload-text {
+    font-size: 1.05rem;
+  }
+
+  .upload-hint {
+    font-size: 0.88rem;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+  }
+
+  .summary-actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .omie-features {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  .footer-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+  }
+
+  .fab-container {
+    bottom: 30px;
+    right: 30px;
+  }
+
+  .fab {
+    width: 64px;
+    height: 64px;
+    font-size: 1.4rem;
+  }
+}
+
+/* Tablets em paisagem e desktops pequenos */
+@media (min-width: 1024px) {
+  .workflow-grid {
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .summary-actions {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+/* Desktops grandes */
+@media (min-width: 1200px) {
+  .main-container {
+    padding: 40px var(--desktop-padding);
+  }
+
+  .workflow-grid {
+    gap: 40px;
+  }
+
+  .card {
+    padding: 24px;
+  }
+
+  .upload-area {
+    padding: 34px 24px;
+  }
+}
+
+/* Mobile em paisagem */
+@media (max-width: 767px) and (orientation: landscape) {
+  .header {
+    padding: 16px var(--mobile-padding);
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .header p {
+    font-size: 0.9rem;
+  }
+
+  .header-stats {
+    margin-top: 12px;
+  }
+}
+
+/* Dispositivos muito pequenos */
+@media (max-width: 320px) {
+  .header h1 {
+    font-size: 1.6rem;
+  }
+
+  .upload-area {
+    padding: 20px 12px;
+    min-height: 100px;
+  }
+
+  .upload-icon {
+    font-size: 1.8rem;
+  }
+
+  .upload-text {
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    padding: 10px 16px;
+    font-size: 0.8rem;
+  }
+
+  .btn-lg {
+    padding: 14px 20px;
+    font-size: 0.9rem;
+    min-height: 48px;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .fab {
+    width: 48px;
+    height: 48px;
+    font-size: 1rem;
+  }
+}
+
+/* Modo escuro forçado para alguns elementos */
+@media (prefers-color-scheme: dark) {
+  .form-control::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+}
+
+/* Redução de movimento para acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .header::before {
+    animation: none;
+  }
+
+  body::before {
+    animation: none;
+  }
+
+  .card::before {
+    animation: none;
+  }
+
+  .progress-fill::after {
+    animation: none;
+  }
+}
+
+/* Impressão */
+@media print {
+  .navbar,
+  .fab-container,
+  .loading-overlay {
+    display: none !important;
+  }
+
+  .card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+
+  .btn {
+    display: none;
+  }
+}
+
+/* Estados de foco para navegação por teclado */
+.btn:focus-visible,
+.form-control:focus-visible,
+.upload-area:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Alto contraste */
+@media (prefers-contrast: high) {
+  :root {
+    --border: rgba(255, 255, 255, 0.3);
+    --text-secondary: #cccccc;
+  }
+
+  .card {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .upload-area {
+    border-width: 4px;
+  }
+
+  .btn {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+}
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="#" class="logo">RECIFE FLATS TEMPORADA</a>
+      
+      <ul class="nav-links">
+        <li><a href="https://recife-flat-temporada.netlify.app/" target="_blank">Acessar Sistema</a></li>
+        <li><a href="https://sites.google.com/apartamentodetemporada.com.br/home/in%C3%ADcio" target="_blank">Google WEBSITES</a></li>
+      </ul>
+
+      <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="https://recife-flat-temporada.netlify.app/" target="_blank">Acessar Sistema</a>
+      <a href="https://sites.google.com/apartamentodetemporada.com.br/home/in%C3%ADcio" target="_blank">Google WEBSITES</a>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>📋 GESTÃO DOCUMENTOS HÓSPEDES</h1>
+    <p>Sistema Integrado com Omie — Apartamentos por Temporada</p>
+    <div class="header-stats">
+      <div class="stat-item">
+        <i class="fas fa-file-pdf"></i> 
+        <span class="stat-label">PDFs:</span>
+        <span id="totalProcessed">0</span>
+      </div>
+      <div class="stat-item">
+        <i class="fas fa-users"></i> 
+        <span class="stat-label">Hóspedes:</span>
+        <span id="totalGuests">0</span>
+      </div>
+      <div class="stat-item">
+        <i class="fas fa-clock"></i> 
+        <span class="stat-label">Atualizado:</span>
+        <span id="lastUpdate">--:--</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTAINER -->
+  <div class="main-container">
+    <div class="workflow-grid">
+      
+      <!-- CARD 1: DADOS DO HÓSPEDE -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">👤</div>
+          <div class="card-info">
+            <div class="card-title">Dados do Hóspede</div>
+            <div class="card-subtitle">Informações básicas, operador e apartamento</div>
+          </div>
+        </div>
+
+        <form id="hospedeForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="apartamento">🏠 Apartamento</label>
+              <select id="apartamento" class="form-control" required>
+                <option value="">Selecione o apartamento</option>
+                <option value="105">Ipê 105</option>
+                <option value="203">Ipê 203</option>
+                <option value="804">Forte São Pedro 804</option>
+                <option value="1006">Golden View 1006</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="colaborador">👨‍💼 Operador Responsável</label>
+              <select id="colaborador" class="form-control" required>
+                <option value="">Selecione o operador</option>
+                <option value="2153 Vanessa_Rafaella">2153 — Vanessa Rafaella</option>
+                <option value="7461 Gabriela_Rodrigues">7461 — Gabriela Rodrigues</option>
+                <option value="9923 Lucas_Carneiro">9923 — Lucas Carneiro</option>
+                <option value="0001 Prestador_Externo">0001 — Prestador Externo</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nomeHospede">👤 Nome Hóspede Principal</label>
+              <input type="text" id="nomeHospede" class="form-control" placeholder="Nome completo sem acentos" required />
+            </div>
+            <div class="form-group">
+              <label for="dataEstadia">📅 Data da Estadia</label>
+              <input type="month" id="dataEstadia" class="form-control" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="numAcompanhantes">👥 Número de Acompanhantes</label>
+              <select id="numAcompanhantes" class="form-control" onchange="updateAcompanhantesUI()">
+                <option value="0">Apenas hóspede principal</option>
+                <option value="1">1 Acompanhante</option>
+                <option value="2">2 Acompanhantes</option>
+                <option value="3">3 Acompanhantes</option>
+                <option value="4">4 Acompanhantes</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="temFormularios">📋 Formulários Extras</label>
+              <select id="temFormularios" class="form-control">
+                <option value="nao">Não possui</option>
+                <option value="liberacao">Formulário de Liberação</option>
+                <option value="termo">Termo de Responsabilidade</option>
+                <option value="ambos">Ambos os formulários</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-success btn-lg" onclick="validarDados()">
+            <i class="fas fa-check"></i> Validar Dados
+          </button>
+        </form>
+        <div id="dadosMessage" class="message"></div>
+      </div>
+
+      <!-- CARD 2: FNRH -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon card-icon-orange">📄</div>
+          <div class="card-info">
+            <div class="card-title">FNRH - Download/Upload</div>
+            <div class="card-subtitle">Ficha Nacional de Registro de Hóspedes</div>
+          </div>
+        </div>
+
+        <div class="upload-section">
+          <div class="upload-area fnrh" onclick="document.getElementById('fnrhFile').click()">
+            <div class="upload-icon">📄</div>
+            <div class="upload-text">FNRH PRONTA (PDF)</div>
+            <div class="upload-hint">Toque para fazer upload do PDF da FNRH</div>
+          </div>
+          <input type="file" id="fnrhFile" accept=".pdf" style="display:none;" />
+
+          <div class="upload-divider">
+            <span>OU</span>
+          </div>
+          
+          <button type="button" class="btn btn-warning btn-block" onclick="downloadFNRHTemplate()">
+            <i class="fas fa-download"></i> Baixar Template FNRH
+          </button>
+
+          <div id="fnrhList" class="file-list"></div>
+        </div>
+        <div id="fnrhMessage" class="message"></div>
+      </div>
+
+      <!-- CARD 3: DOCUMENTOS PRINCIPAIS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon card-icon-purple">🆔</div>
+          <div class="card-info">
+            <div class="card-title">Documentos do Hóspede Principal</div>
+            <div class="card-subtitle">RG, CPF, Comprovantes</div>
+          </div>
+        </div>
+
+        <div class="upload-section">
+          <div class="upload-area documents" onclick="document.getElementById('documentFiles').click()">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">DOCUMENTOS (PDF/Imagens)</div>
+            <div class="upload-hint">PDF, JPG, PNG, HEIC, WEBP — múltiplos</div>
+          </div>
+          <input type="file" id="documentFiles" accept=".pdf,image/*" multiple style="display:none;" />
+          <div id="documentList" class="file-list"></div>
+        </div>
+        
+        <button type="button" class="btn btn-primary btn-block" id="processDocuments" disabled onclick="processarGrupo('principal')">
+          <i class="fas fa-cog"></i> Processar Documentos
+        </button>
+        <div id="documentMessage" class="message"></div>
+      </div>
+
+      <!-- CARD 4: FORMULÁRIOS EXTRAS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">📑</div>
+          <div class="card-info">
+            <div class="card-title">Formulários Extras</div>
+            <div class="card-subtitle">Liberação, Termos e outros</div>
+          </div>
+        </div>
+
+        <div class="upload-section">
+          <div class="upload-area documents" onclick="document.getElementById('formExtraFiles').click()">
+            <div class="upload-icon">📝</div>
+            <div class="upload-text">FORMULÁRIOS (PDF/Imagens)</div>
+            <div class="upload-hint">Adicione Formulário de Liberação/Termos</div>
+          </div>
+          <input type="file" id="formExtraFiles" accept=".pdf,image/*" multiple style="display:none;" />
+          <div id="formExtraList" class="file-list"></div>
+        </div>
+        
+        <button type="button" class="btn btn-primary btn-block" id="processFormExtras" disabled onclick="processarGrupo('formularios')">
+          <i class="fas fa-cog"></i> Processar Formulários
+        </button>
+        <div id="formExtraMessage" class="message"></div>
+      </div>
+    </div>
+
+    <!-- CONTAINER DOS ACOMPANHANTES (será preenchido dinamicamente) -->
+    <div id="acompanhantesContainer"></div>
+
+    <!-- PREVIEW -->
+    <div class="preview-section" id="previewSection">
+      <div class="preview-title">
+        <i class="fas fa-eye"></i> Preview do Nome Final
+      </div>
+      <div class="preview-filename" id="previewFilename">
+        APT-[NUM]-DOCUMENTOS-[HOSPEDE]-[MES][ANO]-OP[COD].pdf
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-text" id="progressText">Aguardando processamento...</div>
+    </div>
+
+    <!-- RESUMO -->
+    <div class="summary-section" id="summarySection" style="display:none;">
+      <h3>📊 Resumo do Processamento</h3>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-number" id="summaryFNRH">0</div>
+          <div class="summary-label">FNRH</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-number" id="summaryDocsPrincipal">0</div>
+          <div class="summary-label">Docs Hóspede</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-number" id="summaryForm">0</div>
+          <div class="summary-label">Formulários</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-number" id="summaryAcomp">0</div>
+          <div class="summary-label">Docs Acompanhantes</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-number" id="summaryPages">0</div>
+          <div class="summary-label">Páginas Totais</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-number" id="summarySize">0 MB</div>
+          <div class="summary-label">Tamanho Final</div>
+        </div>
+      </div>
+      
+      <div class="summary-actions">
+        <button type="button" class="btn btn-success btn-lg btn-block" id="compileFinalBtn" onclick="compilarDocumentoFinal()">
+          <i class="fas fa-archive"></i> Compilar Documento Final
+        </button>
+        <button type="button" class="btn btn-primary btn-lg btn-block" id="downloadFinalBtn" style="display:none;" onclick="baixarDocumentoFinal()">
+          <i class="fas fa-download"></i> Baixar Documento Compilado
+        </button>
+      </div>
+    </div>
+
+    <!-- OMIE -->
+    <div class="omie-section">
+      <div class="omie-title">
+        <i class="fas fa-link"></i> Integração com Omie
+      </div>
+      <div class="omie-instructions">
+        Após baixar o documento compilado, faça o upload na ficha do hóspede no Omie.
+      </div>
+      <div class="omie-features">
+        <div class="omie-feature">
+          <i class="fas fa-shield-alt"></i>
+          <span>Armazenamento Seguro</span>
+        </div>
+        <div class="omie-feature">
+          <i class="fas fa-search"></i>
+          <span>Busca Facilitada</span>
+        </div>
+        <div class="omie-feature">
+          <i class="fas fa-history"></i>
+          <span>Histórico Completo</span>
+        </div>
+        <div class="omie-feature">
+          <i class="fas fa-users"></i>
+          <span>Acesso da Equipe</span>
+        </div>
+      </div>
+      
+      <button type="button" class="btn btn-omie btn-lg btn-block" onclick="abrirOmie()">
+        <i class="fas fa-external-link-alt"></i> Abrir Omie
+      </button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-grid">
+        <!-- Apartamentos -->
+        <div class="footer-section">
+          <h4>🏢 Apartamentos</h4>
+          <ul class="footer-links">
+            <li><a href="105.html">🏢 Apto 105</a></li>
+            <li><a href="203.html">🏨 Apto 203</a></li>
+            <li><a href="1006.html">🏙️ Apto 1006</a></li>
+            <li><a href="804.html">🌟 Apto 804</a></li>
+          </ul>
+        </div>
+
+        <!-- Ferramentas -->
+        <div class="footer-section">
+          <h4>🛠️ Ferramentas</h4>
+          <ul class="footer-links">
+            <li><a href="https://cadastro-hospede.netlify.app">🆕 Novo Hóspede</a></li>
+            <li><a href="https://imagem-pdf-name-ok.netlify.app/pdf-rename-apt">📄 Renomeador PDF</a></li>
+            <li><a href="index.html">🏠 Página Inicial</a></li>
+            <li><a href="https://controle-caixa.netlify.app/">💰 Controle Caixa</a></li>
+          </ul>
+        </div>
+
+        <!-- Status -->
+        <div class="footer-section">
+          <h4>📈 Status do Sistema</h4>
+          <div class="quick-stats">
+            <div class="stat-item">
+              <span class="stat-number">4</span>
+              <span class="stat-label">Apartamentos</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">10</span>
+              <span class="stat-label">Ferramentas</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">2025.8</span>
+              <span class="stat-label">Versão</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informações -->
+        <div class="footer-section">
+          <h4>ℹ️ Informações</h4>
+          <ul class="footer-links">
+         
+            <li><a href="https://wa.me/5581996601178?text=Oi%20Vanessa%2C%20tudo%20bem%3F%20Estou%20precisando%20de%20ajuda%2C%20tem%20como%20me%20auxiliar%3F">🆘 Suporte</a></li>
+            <li><a href="https://admin.booking.com">📝 Booking.com</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2025 Sistema de Hospedagem | Versão 2025.8 | Última atualização: 11 de Agosto, 2025</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- FABs (Floating Action Buttons) -->
+  <div class="fab-container">
+    <button type="button" class="fab fab-reset" onclick="resetarSistema()" title="Resetar Sistema" aria-label="Resetar Sistema">
+      <i class="fas fa-redo"></i>
+    </button>
+    <button type="button" class="fab fab-help" onclick="mostrarAjuda()" title="Ajuda e Atalhos" aria-label="Ajuda">
+      <i class="fas fa-question"></i>
+    </button>
+  </div>
+
+  <!-- Loading Overlay (para melhor UX em mobile) -->
+  <div class="loading-overlay" id="loadingOverlay" style="display:none;">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <div class="loading-text">Processando...</div>
+    </div>
+  </div>
+
+    <!-- JavaScript Local - IMPORTANTE: Carregar no final do body -->
+  <script>
+// ====== CONFIGURAÇÕES E CONSTANTES ======
+const VALID_TYPES = [
+  'application/pdf',
+  'image/jpeg',
+  'image/jpg', 
+  'image/png',
+  'image/heic',
+  'image/webp'
+];
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_FILES_PER_GROUP = 20;
+
+// Estado global da aplicação
+const state = {
+  fnrhFile: null,
+  grupos: {
+    principal: { raw: [], processed: [] },
+    formularios: { raw: [], processed: [] },
+    acompanhantes: [] // [{ nome, raw:[], processed:[] }]
+  },
+  finalDocument: null,
+  guest: {},
+  isProcessing: false
+};
+
+// ====== INICIALIZAÇÃO ======
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('🚀 Iniciando sistema de gestão de documentos...');
+  
+  // Configurações iniciais
+  setCurrentMonth();
+  initEventListeners();
+  initDragAndDrop();
+  updateLastUpdate();
+  
+  // Atualizar timestamp a cada minuto
+  setInterval(updateLastUpdate, 60000);
+  
+  // Verificar suporte a recursos necessários
+  checkBrowserSupport();
+  
+  console.log('✅ Sistema inicializado com sucesso!');
+});
+
+// ====== VERIFICAÇÃO DE SUPORTE DO NAVEGADOR ======
+function checkBrowserSupport() {
+  const features = {
+    'File API': typeof File !== 'undefined',
+    'PDF-lib': typeof PDFLib !== 'undefined',
+    'jsPDF': typeof window.jspdf !== 'undefined',
+    'Drag and Drop': 'draggable' in document.createElement('div')
+  };
+  
+  const unsupported = Object.entries(features)
+    .filter(([name, supported]) => !supported)
+    .map(([name]) => name);
+    
+  if (unsupported.length > 0) {
+    showMessage('dadosMessage', 
+      `⚠️ Recursos não suportados: ${unsupported.join(', ')}. Considere atualizar seu navegador.`, 
+      'warning'
+    );
+  }
+}
+
+// ====== EVENT LISTENERS ======
+function initEventListeners() {
+  // Arquivo FNRH
+  byId('fnrhFile').addEventListener('change', onFNRHUpload);
+  
+  // Arquivos de grupos
+  byId('documentFiles').addEventListener('change', (e) => onGrupoUpload('principal', e));
+  byId('formExtraFiles').addEventListener('change', (e) => onGrupoUpload('formularios', e));
+  
+  // Campos do formulário com validação em tempo real
+  byId('nomeHospede').addEventListener('input', (e) => {
+    e.target.value = e.target.value.toUpperCase().replace(/[^A-Z\s]/g, '');
+    updatePreview();
+    validateForm();
+  });
+  
+  // Outros campos que afetam o preview
+  ['apartamento', 'colaborador', 'dataEstadia', 'temFormularios'].forEach(id => {
+    byId(id).addEventListener('change', () => {
+      updatePreview();
+      validateForm();
+    });
+  });
+  
+  // Atalhos de teclado
+  document.addEventListener('keydown', handleKeyboardShortcuts);
+  
+  // Prevenção de saída acidental se houver dados
+  window.addEventListener('beforeunload', (e) => {
+    if (hasUnsavedData()) {
+      e.preventDefault();
+      e.returnValue = 'Você tem dados não salvos. Tem certeza que deseja sair?';
+    }
+  });
+  
+  // Detecção de mudança de orientação em mobile
+  window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+      adjustForOrientation();
+    }, 100);
+  });
+}
+
+// ====== NAVEGAÇÃO MOBILE ======
+function toggleMenu() {
+  const hamburger = document.querySelector('.hamburger');
+  const mobileMenu = byId('mobileMenu');
+  
+  hamburger.classList.toggle('active');
+  mobileMenu.classList.toggle('active');
+  
+  // Fechar menu ao clicar fora
+  if (mobileMenu.classList.contains('active')) {
+    setTimeout(() => {
+      document.addEventListener('click', closeMobileMenuOnClickOutside);
+    }, 100);
+  }
+}
+
+function closeMobileMenuOnClickOutside(e) {
+  const navbar = document.querySelector('.navbar');
+  if (!navbar.contains(e.target)) {
+    const hamburger = document.querySelector('.hamburger');
+    const mobileMenu = byId('mobileMenu');
+    
+    hamburger.classList.remove('active');
+    mobileMenu.classList.remove('active');
+    document.removeEventListener('click', closeMobileMenuOnClickOutside);
+  }
+}
+
+// Fechar menu quando clica em um link
+document.querySelectorAll('.mobile-menu a').forEach(link => {
+  link.addEventListener('click', () => {
+    const hamburger = document.querySelector('.hamburger');
+    const mobileMenu = byId('mobileMenu');
+    
+    hamburger.classList.remove('active');
+    mobileMenu.classList.remove('active');
+  });
+});
+
+// ====== DRAG AND DROP ======
+function initDragAndDrop() {
+  // FNRH
+  setupDragAndDrop(document.querySelector('.upload-area.fnrh'), 'fnrh');
+  
+  // Documentos principais
+  const mainDocsArea = document.querySelectorAll('.upload-area.documents')[0];
+  if (mainDocsArea) {
+    setupDragAndDrop(mainDocsArea, 'principal');
+  }
+  
+  // Formulários extras
+  const formArea = document.querySelectorAll('.upload-area.documents')[1];
+  if (formArea) {
+    setupDragAndDrop(formArea, 'formularios');
+  }
+}
+
+function setupDragAndDrop(element, type) {
+  if (!element) return;
+  
+  element.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    element.classList.add('dragover');
+  });
+  
+  element.addEventListener('dragleave', () => {
+    element.classList.remove('dragover');
+  });
+  
+  element.addEventListener('drop', (e) => {
+    e.preventDefault();
+    element.classList.remove('dragover');
+    
+    const files = Array.from(e.dataTransfer.files);
+    
+    if (type === 'fnrh') {
+      if (files.length > 1) {
+        showMessage('fnrhMessage', '❌ Selecione apenas um arquivo PDF para a FNRH.', 'error');
+        return;
+      }
+      onFNRHUpload({ target: { files } });
+    } else {
+      onGrupoUpload(type, { target: { files } });
+    }
+  });
+}
+
+// ====== VALIDAÇÃO DE DADOS ======
+function validateForm() {
+  const apartamento = val('apartamento');
+  const colaborador = val('colaborador');
+  const nomeHospede = val('nomeHospede');
+  const dataEstadia = val('dataEstadia');
+  
+  const isValid = apartamento && colaborador && nomeHospede && dataEstadia;
+  
+  // Habilitar/desabilitar botão de validação
+  const validateBtn = document.querySelector('button[onclick="validarDados()"]');
+  if (validateBtn) {
+    validateBtn.disabled = !isValid;
+  }
+  
+  return isValid;
+}
+
+function validarDados() {
+  if (!validateForm()) {
+    showMessage('dadosMessage', '⚠️ Preencha todos os campos obrigatórios!', 'error');
+    return;
+  }
+  
+  const colaborador = val('colaborador');
+  const [opCod, ...opNomeParts] = colaborador.split(' ');
+  const opNome = opNomeParts.join(' ').replace(/_/g, ' ');
+  
+  state.guest = {
+    apartamento: val('apartamento'),
+    operadorCodigo: opCod,
+    operadorNome: opNome || '',
+    nomeHospede: val('nomeHospede').trim().replace(/\s+/g, '_'),
+    dataEstadia: val('dataEstadia'),
+    numAcompanhantes: parseInt(val('numAcompanhantes'), 10) || 0,
+    temFormularios: val('temFormularios')
+  };
+  
+  showMessage('dadosMessage', '✅ Dados validados! Prossiga com os uploads.', 'success');
+  updatePreview();
+  updateSummaryCounts();
+  
+  // Incrementar contador de hóspedes
+  const currentCount = parseInt(byId('totalGuests').textContent, 10) || 0;
+  byId('totalGuests').textContent = String(currentCount + 1);
+  
+  // Mostrar seção de resumo
+  byId('summarySection').style.display = 'block';
+}
+
+// ====== GESTÃO DE ACOMPANHANTES (CORRIGIDA) ======
+function updateAcompanhantesUI() {
+  const numAcompanhantes = parseInt(val('numAcompanhantes'), 10) || 0;
+  const container = byId('acompanhantesContainer');
+  
+  // Limpar container
+  container.innerHTML = '';
+  
+  // Resetar array de acompanhantes
+  state.grupos.acompanhantes = [];
+  
+  if (numAcompanhantes > 0) {
+    // Criar cards para cada acompanhante
+    for (let i = 0; i < numAcompanhantes; i++) {
+      createAcompanhanteCard(i, container);
+    }
+    
+    // Adicionar dica informativa
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'message info';
+    infoDiv.style.display = 'block';
+    infoDiv.innerHTML = `ℹ️ Configure os dados e documentos dos ${numAcompanhantes} acompanhante(s).`;
+    container.insertBefore(infoDiv, container.firstChild);
+  }
+  
+  updatePreview();
+  updateSummaryCounts();
+}
+
+function createAcompanhanteCard(index, container) {
+  // Inicializar dados do acompanhante
+  state.grupos.acompanhantes[index] = {
+    nome: '',
+    raw: [],
+    processed: []
+  };
+  
+  const cardDiv = document.createElement('div');
+  cardDiv.className = 'card';
+  cardDiv.innerHTML = `
+    <div class="card-header">
+      <div class="card-icon">👥</div>
+      <div class="card-info">
+        <div class="card-title">Acompanhante ${index + 1}</div>
+        <div class="card-subtitle">Nome e documentos do acompanhante</div>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="acompNome_${index}">👤 Nome do Acompanhante ${index + 1}</label>
+      <input 
+        type="text" 
+        id="acompNome_${index}"
+        class="form-control" 
+        placeholder="Nome completo sem acentos" 
+        oninput="onAcompanhanteNameChange(${index}, this.value)"
+      />
+    </div>
+    
+    <div class="upload-section">
+      <div class="upload-area documents" onclick="document.getElementById('acompFiles_${index}').click()">
+        <div class="upload-icon">📂</div>
+        <div class="upload-text">DOCUMENTOS DO ACOMPANHANTE ${index + 1}</div>
+        <div class="upload-hint">PDF, JPG, PNG, HEIC, WEBP — múltiplos arquivos</div>
+      </div>
+      <input 
+        type="file" 
+        id="acompFiles_${index}" 
+        accept=".pdf,image/*" 
+        multiple 
+        style="display:none;" 
+        onchange="onAcompanhanteUpload(${index}, event)"
+      />
+      <div id="acompList_${index}" class="file-list"></div>
+    </div>
+    
+    <button 
+      type="button" 
+      class="btn btn-primary btn-block" 
+      id="btnProcAcomp_${index}" 
+      disabled 
+      onclick="processarAcompanhante(${index})"
+    >
+      <i class="fas fa-cog"></i> Processar Documentos Acompanhante ${index + 1}
+    </button>
+    
+    <div id="acompMessage_${index}" class="message"></div>
+  `;
+  
+  container.appendChild(cardDiv);
+  
+  // Configurar drag and drop para este acompanhante
+  const uploadArea = cardDiv.querySelector('.upload-area');
+  setupDragAndDrop(uploadArea, `acompanhante_${index}`);
+}
+
+function onAcompanhanteNameChange(index, value) {
+  if (state.grupos.acompanhantes[index]) {
+    state.grupos.acompanhantes[index].nome = value.toUpperCase().replace(/[^A-Z\s]/g, '').trim();
+    updatePreview();
+  }
+}
+
+function onAcompanhanteUpload(index, event) {
+  const files = Array.from(event.target.files || []);
+  
+  if (!files.length) return;
+  
+  // Validar tipos de arquivo
+  const invalidFiles = files.filter(file => !VALID_TYPES.includes(file.type));
+  if (invalidFiles.length > 0) {
+    showMessage(`acompMessage_${index}`, 
+      `❌ Tipos não suportados: ${invalidFiles.map(f => f.name).join(', ')}`, 
+      'error'
+    );
+    return;
+  }
+  
+  // Validar tamanho dos arquivos
+  const oversizedFiles = files.filter(file => file.size > MAX_FILE_SIZE);
+  if (oversizedFiles.length > 0) {
+    showMessage(`acompMessage_${index}`, 
+      `❌ Arquivos muito grandes (máx 50MB): ${oversizedFiles.map(f => f.name).join(', ')}`, 
+      'error'
+    );
+    return;
+  }
+  
+  // Validar quantidade
+  if (files.length > MAX_FILES_PER_GROUP) {
+    showMessage(`acompMessage_${index}`, 
+      `❌ Máximo ${MAX_FILES_PER_GROUP} arquivos por grupo.`, 
+      'error'
+    );
+    return;
+  }
+  
+  // Armazenar arquivos
+  state.grupos.acompanhantes[index].raw = files;
+  
+  // Renderizar lista de arquivos
+  renderFileList(`acompList_${index}`, files, false, (fileIndex) => {
+    removeAcompanhanteFile(index, fileIndex);
+  });
+  
+  // Habilitar botão de processamento
+  byId(`btnProcAcomp_${index}`).disabled = false;
+  
+  showMessage(`acompMessage_${index}`, 
+    `✅ ${files.length} arquivo(s) carregado(s) para o acompanhante ${index + 1}.`, 
+    'success'
+  );
+  
+  updateSummaryCounts();
+}
+
+function removeAcompanhanteFile(acompIndex, fileIndex) {
+  const acomp = state.grupos.acompanhantes[acompIndex];
+  if (!acomp) return;
+  
+  acomp.raw.splice(fileIndex, 1);
+  
+  // Re-renderizar lista
+  renderFileList(`acompList_${acompIndex}`, acomp.raw, false, (fileIdx) => {
+    removeAcompanhanteFile(acompIndex, fileIdx);
+  });
+  
+  // Desabilitar botão se não há arquivos
+  if (acomp.raw.length === 0) {
+    byId(`btnProcAcomp_${acompIndex}`).disabled = true;
+    byId(`acompFiles_${acompIndex}`).value = '';
+  }
+  
+  updateSummaryCounts();
+}
+
+async function processarAcompanhante(index) {
+  const acomp = state.grupos.acompanhantes[index];
+  
+  if (!acomp || !acomp.raw.length) {
+    showMessage(`acompMessage_${index}`, '❌ Nenhum documento para processar!', 'error');
+    return;
+  }
+  
+  if (state.isProcessing) {
+    showMessage(`acompMessage_${index}`, '⏳ Aguarde o processamento atual terminar.', 'warning');
+    return;
+  }
+  
+  state.isProcessing = true;
+  showLoadingOverlay(true);
+  
+  try {
+    showProgress(`Processando documentos do acompanhante ${index + 1}...`, 0);
+    
+    acomp.processed = [];
+    
+    for (let i = 0; i < acomp.raw.length; i++) {
+      const file = acomp.raw[i];
+      const progress = ((i + 1) / acomp.raw.length) * 100;
+      
+      showProgress(`Processando: ${file.name}`, progress);
+      
+      try {
+        const pdfData = await convertToPDF(file);
+        const safeName = sanitizeFileName(file.name).replace(/\.[^/.]+$/, '.pdf');
+        
+        acomp.processed.push({
+          name: safeName,
+          data: pdfData
+        });
+        
+        // Pequena pausa para UX
+        await sleep(100);
+        
+      } catch (error) {
+        console.error(`Erro ao processar ${file.name}:`, error);
+        showMessage(`acompMessage_${index}`, 
+          `⚠️ Erro ao processar ${file.name}: ${error.message}`, 
+          'warning'
+        );
+      }
+    }
+    
+    hideProgress();
+    showLoadingOverlay(false);
+    
+    const processedCount = acomp.processed.length;
+    const totalCount = acomp.raw.length;
+    
+    if (processedCount === totalCount) {
+      showMessage(`acompMessage_${index}`, 
+        `✅ ${processedCount} documento(s) processado(s) com sucesso!`, 
+        'success'
+      );
+    } else {
+      showMessage(`acompMessage_${index}`, 
+        `⚠️ ${processedCount}/${totalCount} documentos processados. Alguns falharam.`, 
+        'warning'
+      );
+    }
+    
+    updateSummaryCounts();
+    
+  } catch (error) {
+    console.error('Erro no processamento:', error);
+    hideProgress();
+    showLoadingOverlay(false);
+    showMessage(`acompMessage_${index}`, 
+      `❌ Erro no processamento: ${error.message}`, 
+      'error'
+    );
+  } finally {
+    state.isProcessing = false;
+  }
+}
+
+// ====== UPLOAD DE ARQUIVOS ======
+function onFNRHUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Validar tipo
+  if (file.type !== 'application/pdf') {
+    showMessage('fnrhMessage', '❌ Selecione apenas arquivos PDF para a FNRH.', 'error');
+    byId('fnrhFile').value = '';
+    return;
+  }
+  
+  // Validar tamanho
+  if (file.size > MAX_FILE_SIZE) {
+    showMessage('fnrhMessage', '❌ Arquivo muito grande. Máximo 50MB.', 'error');
+    byId('fnrhFile').value = '';
+    return;
+  }
+  
+  state.fnrhFile = file;
+  
+  renderFileList('fnrhList', [file], true, () => {
+    removeFNRH();
+  });
+  
+  showMessage('fnrhMessage', '✅ FNRH carregada com sucesso!', 'success');
+  updateSummaryCounts();
+}
+
+function removeFNRH() {
+  state.fnrhFile = null;
+  byId('fnrhList').innerHTML = '';
+  byId('fnrhFile').value = '';
+  showMessage('fnrhMessage', '🗑️ FNRH removida.', 'warning');
+  updateSummaryCounts();
+}
+
+function onGrupoUpload(grupo, event) {
+  const files = Array.from(event.target.files || []);
+  
+  if (!files.length) return;
+  
+  // Validar tipos
+  const invalidFiles = files.filter(file => !VALID_TYPES.includes(file.type));
+  if (invalidFiles.length > 0) {
+    const messageId = grupo === 'formularios' ? 'formExtraMessage' : 'documentMessage';
+    showMessage(messageId, 
+      `❌ Tipos não suportados: ${invalidFiles.map(f => f.name).join(', ')}`, 
+      'error'
+    );
+    return;
+  }
+  
+  // Validar tamanhos
+  const oversizedFiles = files.filter(file => file.size > MAX_FILE_SIZE);
+  if (oversizedFiles.length > 0) {
+    const messageId = grupo === 'formularios' ? 'formExtraMessage' : 'documentMessage';
+    showMessage(messageId, 
+      `❌ Arquivos muito grandes (máx 50MB): ${oversizedFiles.map(f => f.name).join(', ')}`, 
+      'error'
+    );
+    return;
+  }
+  
+  // Validar quantidade
+  if (files.length > MAX_FILES_PER_GROUP) {
+    const messageId = grupo === 'formularios' ? 'formExtraMessage' : 'documentMessage';
+    showMessage(messageId, 
+      `❌ Máximo ${MAX_FILES_PER_GROUP} arquivos por grupo.`, 
+      'error'
+    );
+    return;
+  }
+  
+  // Armazenar arquivos
+  state.grupos[grupo].raw = files;
+  
+  // Renderizar lista
+  const listId = grupo === 'formularios' ? 'formExtraList' : 'documentList';
+  renderFileList(listId, files, false, (index) => {
+    removeFromGrupo(grupo, index);
+  });
+  
+  // Habilitar botão de processamento
+  const btnId = grupo === 'formularios' ? 'processFormExtras' : 'processDocuments';
+  byId(btnId).disabled = false;
+  
+  // Mostrar mensagem de sucesso
+  const messageId = grupo === 'formularios' ? 'formExtraMessage' : 'documentMessage';
+  showMessage(messageId, 
+    `✅ ${files.length} arquivo(s) carregado(s).`, 
+    'success'
+  );
+  
+  updateSummaryCounts();
+}
+
+function removeFromGrupo(grupo, index) {
+  const files = state.grupos[grupo].raw;
+  files.splice(index, 1);
+  
+  // Re-renderizar lista
+  const listId = grupo === 'formularios' ? 'formExtraList' : 'documentList';
+  renderFileList(listId, files, false, (idx) => {
+    removeFromGrupo(grupo, idx);
+  });
+  
+  // Desabilitar botão se não há arquivos
+  if (files.length === 0) {
+    const btnId = grupo === 'formularios' ? 'processFormExtras' : 'processDocuments';
+    byId(btnId).disabled = true;
+  }
+  
+  updateSummaryCounts();
+}
+
+// ====== PROCESSAMENTO DE GRUPOS ======
+async function processarGrupo(grupo) {
+  const grupoData = state.grupos[grupo];
+  
+  if (!grupoData || !grupoData.raw.length) {
+    const messageId = grupo === 'formularios' ? 'formExtraMessage' : 'documentMessage';
+    showMessage(messageId, '❌ Nenhum documento para processar!', 'error');
+    return;
+  }
+  
+  if (state.isProcessing) {
+    const messageId = grupo === 'formularios' ? 'formExtraMessage' : 'documentMessage';
+    showMessage(messageId, '⏳ Aguarde o processamento atual terminar.', 'warning');
+    return;
+  }
+  
+  state.isProcessing = true;
+  showLoadingOverlay(true);
+  
+  try {
+    const groupName = grupo === 'formularios' ? 'formulários' : 'documentos principais';
+    showProgress(`Processando ${groupName}...`, 0);
+    
+    grupoData.processed = [];
+    
+    for (let i = 0; i < grupoData.raw.length; i++) {
+      const file = grupoData.raw[i];
+      const progress = ((i + 1) / grupoData.raw.length) * 100;
+      
+      showProgress(`Processando: ${file.name}`, progress);
+      
+      try {
+        const pdfData = await convertToPDF(file);
+        const safeName = sanitizeFileName(file.name).replace(/\.[^/.]+$/, '.pdf');
+        
+        grupoData.processed.push({
+          name: safeName,
+          data: pdfData
+        });
+        
+        // Pequena pausa para UX
+        await sleep(100);
+        
+      } catch (error) {
+        console.error(`Erro ao processar ${file.name}:`, error);
+      }
+    }
+    
+    hideProgress();
+    showLoadingOverlay(false);
+    
+    const messageId = grupo === 'formularios' ? 'formExtraMessage' : 'documentMessage';
+    const processedCount = grupoData.processed.length;
+    const totalCount = grupoData.raw.length;
+    
+    if (processedCount === totalCount) {
+      showMessage(messageId, 
+        `✅ ${processedCount} PDF(s) processado(s) com sucesso!`, 
+        'success'
+      );
+    } else {
+      showMessage(messageId, 
+        `⚠️ ${processedCount}/${totalCount} documentos processados. Alguns falharam.`, 
+        'warning'
+      );
+    }
+    
+    updateSummaryCounts();
+    
+  } catch (error) {
+    console.error('Erro no processamento:', error);
+    hideProgress();
+    showLoadingOverlay(false);
+    
+    const messageId = grupo === 'formularios' ? 'formExtraMessage' : 'documentMessage';
+    showMessage(messageId, 
+      `❌ Erro no processamento: ${error.message}`, 
+      'error'
+    );
+  } finally {
+    state.isProcessing = false;
+  }
+}
+
+// ====== CONVERSÃO PARA PDF ======
+async function convertToPDF(file) {
+  if (file.type === 'application/pdf') {
+    return await file.arrayBuffer();
+  }
+  
+  // Converter imagem para PDF
+  const imageDataUrl = await convertToDisplayableImage(file);
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  
+  const img = await loadImageFromDataUrl(imageDataUrl);
+  
+  // Calcular dimensões mantendo proporção
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = pdf.internal.pageSize.getHeight();
+  const imgRatio = img.width / img.height;
+  const pageRatio = pdfWidth / pdfHeight;
+  
+  let width, height;
+  
+  if (imgRatio > pageRatio) {
+    // Imagem mais larga que a página
+    width = pdfWidth - 20; // margem de 10px de cada lado
+    height = width / imgRatio;
+  } else {
+    // Imagem mais alta que a página
+    height = pdfHeight - 20; // margem de 10px top/bottom
+    width = height * imgRatio;
+  }
+  
+  // Centralizar na página
+  const x = (pdfWidth - width) / 2;
+  const y = (pdfHeight - height) / 2;
+  
+  pdf.addImage(imageDataUrl, 'JPEG', x, y, width, height);
+  
+  return pdf.output('arraybuffer');
+}
+
+async function convertToDisplayableImage(file) {
+  if (file.type === 'image/heic' || file.name.toLowerCase().endsWith('.heic')) {
+    try {
+      const convertedBlob = await heic2any({
+        blob: file,
+        toType: 'image/jpeg',
+        quality: 0.8
+      });
+      return await blobToDataURL(convertedBlob);
+    } catch (error) {
+      console.error('Erro na conversão HEIC:', error);
+      throw new Error('Falha ao converter arquivo HEIC');
+    }
+  }
+  
+  return await fileToDataURL(file);
+}
+
+// ====== COMPILAÇÃO DO DOCUMENTO FINAL ======
+async function compilarDocumentoFinal() {
+  if (!state.guest.apartamento) {
+    showMessage('documentMessage', '❌ Valide os dados do hóspede primeiro!', 'error');
+    return;
+  }
+  
+  if (!state.fnrhFile && !hasAnyProcessedDocuments()) {
+    showMessage('documentMessage', '❌ Não há documentos para compilar!', 'error');
+    return;
+  }
+  
+  if (state.isProcessing) {
+    showMessage('documentMessage', '⏳ Aguarde o processamento atual terminar.', 'warning');
+    return;
+  }
+  
+  state.isProcessing = true;
+  showLoadingOverlay(true);
+  
+  try {
+    showProgress('Compilando documento final...', 0);
+    
+    const mergedPDF = await PDFLib.PDFDocument.create();
+    let currentPageCount = 0;
+    const sections = [];
+    
+    // 1. CAPA PROFISSIONAL
+    showProgress('Criando capa profissional...', 5);
+    const coverPDF = await createProfessionalCover();
+    const coverDoc = await PDFLib.PDFDocument.load(coverPDF);
+    const coverPages = await mergedPDF.copyPages(coverDoc, coverDoc.getPageIndices());
+    coverPages.forEach(page => mergedPDF.addPage(page));
+    currentPageCount += coverPages.length;
+    
+    // 2. INTRODUÇÃO
+    showProgress('Criando página de introdução...', 10);
+    const introPDF = await createIntroductionPage();
+    const introDoc = await PDFLib.PDFDocument.load(introPDF);
+    const introPages = await mergedPDF.copyPages(introDoc, introDoc.getPageIndices());
+    introPages.forEach(page => mergedPDF.addPage(page));
+    currentPageCount += introPages.length;
+    
+    // 3. PREPARAR ÍNDICE (calcular páginas)
+    showProgress('Preparando índice...', 15);
+    let nextPageNum = currentPageCount + 2; // +1 para o próprio índice
+    
+    if (state.fnrhFile) {
+      sections.push({
+        title: 'FNRH - FICHA NACIONAL DE REGISTRO',
+        page: nextPageNum
+      });
+      nextPageNum += await countPDFPages(state.fnrhFile);
+    }
+    
+    if (state.grupos.formularios.processed.length > 0) {
+      sections.push({
+        title: 'FORMULÁRIOS EXTRAS',
+        page: nextPageNum
+      });
+      nextPageNum += 1 + await countProcessedPages(state.grupos.formularios.processed);
+    }
+    
+    if (state.grupos.principal.processed.length > 0) {
+      sections.push({
+        title: 'DOCUMENTOS DO HÓSPEDE PRINCIPAL',
+        page: nextPageNum
+      });
+      nextPageNum += 1 + await countProcessedPages(state.grupos.principal.processed);
+    }
+    
+    // Acompanhantes
+    for (let i = 0; i < state.grupos.acompanhantes.length; i++) {
+      const acomp = state.grupos.acompanhantes[i];
+      if (acomp.processed.length > 0) {
+        const nomeAcomp = acomp.nome ? 
+          `ACOMPANHANTE — ${acomp.nome.replace(/\s+/g, ' ')}` : 
+          `ACOMPANHANTE ${i + 1}`;
+        
+        sections.push({
+          title: nomeAcomp,
+          page: nextPageNum
+        });
+        nextPageNum += 1 + await countProcessedPages(acomp.processed);
+      }
+    }
+    
+    // Criar e adicionar índice
+    const indexPDF = await createIndexPage(sections);
+    const indexDoc = await PDFLib.PDFDocument.load(indexPDF);
+    const indexPages = await mergedPDF.copyPages(indexDoc, indexDoc.getPageIndices());
+    indexPages.forEach(page => mergedPDF.addPage(page));
+    currentPageCount += indexPages.length;
+    
+    // 4. FNRH
+    if (state.fnrhFile) {
+      showProgress('Adicionando FNRH...', 25);
+      const fnrhBuffer = await state.fnrhFile.arrayBuffer();
+      const fnrhDoc = await PDFLib.PDFDocument.load(fnrhBuffer);
+      const fnrhPages = await mergedPDF.copyPages(fnrhDoc, fnrhDoc.getPageIndices());
+      fnrhPages.forEach(page => mergedPDF.addPage(page));
+      currentPageCount += fnrhPages.length;
+    }
+    
+    // 5. FORMULÁRIOS EXTRAS
+    if (state.grupos.formularios.processed.length > 0) {
+      showProgress('Adicionando formulários extras...', 40);
+      await addSectionSeparator(mergedPDF, 'FORMULÁRIOS EXTRAS');
+      currentPageCount += 1;
+      currentPageCount += await appendProcessedDocuments(mergedPDF, state.grupos.formularios.processed);
+    }
+    
+    // 6. DOCUMENTOS DO HÓSPEDE PRINCIPAL
+    if (state.grupos.principal.processed.length > 0) {
+      showProgress('Adicionando documentos do hóspede principal...', 60);
+      await addSectionSeparator(mergedPDF, 'DOCUMENTOS — HÓSPEDE PRINCIPAL');
+      currentPageCount += 1;
+      currentPageCount += await appendProcessedDocuments(mergedPDF, state.grupos.principal.processed);
+    }
+    
+    // 7. DOCUMENTOS DOS ACOMPANHANTES
+    let progressStep = 70;
+    for (let i = 0; i < state.grupos.acompanhantes.length; i++) {
+      const acomp = state.grupos.acompanhantes[i];
+      if (acomp.processed.length > 0) {
+        const nomeAcomp = acomp.nome ? 
+          `ACOMPANHANTE — ${acomp.nome.replace(/\s+/g, ' ')}` : 
+          `ACOMPANHANTE ${i + 1}`;
+        
+        showProgress(`Adicionando documentos: ${nomeAcomp}...`, progressStep);
+        await addSectionSeparator(mergedPDF, nomeAcomp);
+        currentPageCount += 1;
+        currentPageCount += await appendProcessedDocuments(mergedPDF, acomp.processed);
+        progressStep += 5;
+      }
+    }
+    
+    // 8. NUMERAÇÃO DE PÁGINAS
+    showProgress('Adicionando numeração de páginas...', 90);
+    await addPageNumbers(mergedPDF);
+    
+    // 9. FINALIZAR
+    showProgress('Finalizando documento...', 95);
+    const finalPDFBytes = await mergedPDF.save();
+    state.finalDocument = new Blob([finalPDFBytes], { type: 'application/pdf' });
+    
+    // Atualizar estatísticas
+    byId('summaryPages').textContent = String(currentPageCount);
+    byId('summarySize').textContent = (state.finalDocument.size / 1024 / 1024).toFixed(2) + ' MB';
+    
+    // Mostrar botão de download
+    byId('downloadFinalBtn').style.display = 'block';
+    
+    hideProgress();
+    showLoadingOverlay(false);
+    
+    showMessage('documentMessage', '✅ Documento compilado com sucesso!', 'success');
+    
+    // Incrementar contador
+    const processedCount = parseInt(byId('totalProcessed').textContent, 10) || 0;
+    byId('totalProcessed').textContent = String(processedCount + 1);
+    
+  } catch (error) {
+    console.error('Erro na compilação:', error);
+    hideProgress();
+    showLoadingOverlay(false);
+    showMessage('documentMessage', `❌ Erro na compilação: ${error.message}`, 'error');
+  } finally {
+    state.isProcessing = false;
+  }
+}
+
+function baixarDocumentoFinal() {
+  if (!state.finalDocument) {
+    showMessage('documentMessage', '❌ Nenhum documento compilado!', 'error');
+    return;
+  }
+  
+  const filename = generateFinalFilename();
+  const url = URL.createObjectURL(state.finalDocument);
+  
+  const downloadLink = document.createElement('a');
+  downloadLink.href = url;
+  downloadLink.download = filename;
+  downloadLink.style.display = 'none';
+  
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+  
+  URL.revokeObjectURL(url);
+  
+  updateLastUpdate();
+  showMessage('documentMessage', '📥 Download iniciado!', 'success');
+}
+
+function generateFinalFilename() {
+  const guest = state.guest;
+  const apt = guest.apartamento || 'XXX';
+  const hospede = guest.nomeHospede || 'HOSPEDE';
+  const data = guest.dataEstadia ? guest.dataEstadia.replace('-', '') : 'MMYYYY';
+  const op = guest.operadorCodigo || '0000';
+  
+  return `APT-${apt}-DOCUMENTOS-${hospede}-${data}-OP${op}.pdf`;
+}
+
+// ====== CRIAÇÃO DE PÁGINAS PDF ======
+async function createProfessionalCover() {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  
+  // Fundo gradiente simulado
+  pdf.setFillColor(245, 248, 252);
+  pdf.rect(0, 0, 210, 297, 'F');
+  
+  // Header azul
+  pdf.setFillColor(41, 128, 185);
+  pdf.rect(0, 0, 210, 80, 'F');
+  
+  // Título principal
+  pdf.setFontSize(24);
+  pdf.setTextColor(255, 255, 255);
+  pdf.text('RECIFE FLATS TEMPORADA', 105, 45, { align: 'center' });
+  
+  pdf.setFontSize(16);
+  pdf.text('DOCUMENTAÇÃO DE HOSPEDAGEM', 105, 60, { align: 'center' });
+  
+  // Linha decorativa
+  pdf.setDrawColor(255, 255, 255);
+  pdf.setLineWidth(1);
+  pdf.line(40, 70, 170, 70);
+  
+  // Informações principais
+  pdf.setFontSize(18);
+  pdf.setTextColor(52, 73, 94);
+  pdf.text('DOCUMENTO ÚNICO COMPILADO', 105, 110, { align: 'center' });
+  
+  // Box com dados
+  pdf.setFillColor(255, 255, 255);
+  pdf.setDrawColor(41, 128, 185);
+  pdf.setLineWidth(0.5);
+  pdf.rect(30, 130, 150, 80, 'FD');
+  
+  pdf.setFontSize(12);
+  pdf.setTextColor(52, 73, 94);
+  const guest = state.guest;
+  
+  let y = 145;
+  pdf.setFont(undefined, 'bold');
+  pdf.text('APARTAMENTO:', 40, y);
+  pdf.setFont(undefined, 'normal');
+  pdf.text(guest.apartamento || 'N/A', 90, y);
+  
+  y += 12;
+  pdf.setFont(undefined, 'bold');
+  pdf.text('HÓSPEDE PRINCIPAL:', 40, y);
+  pdf.setFont(undefined, 'normal');
+  const nomeDisplay = (guest.nomeHospede || '').replace(/_/g, ' ');
+  pdf.text(nomeDisplay, 40, y + 8);
+  
+  y += 20;
+  pdf.setFont(undefined, 'bold');
+  pdf.text('PERÍODO:', 40, y);
+  pdf.setFont(undefined, 'normal');
+  const dataDisplay = guest.dataEstadia ? 
+    guest.dataEstadia.split('-').reverse().join('/') : 'N/A';
+  pdf.text(dataDisplay, 85, y);
+  
+  y += 12;
+  pdf.setFont(undefined, 'bold');
+  pdf.text('OPERADOR:', 40, y);
+  pdf.setFont(undefined, 'normal');
+  pdf.text(`${guest.operadorNome || 'N/A'} (OP ${guest.operadorCodigo || ''})`, 85, y);
+  
+  y += 12;
+  pdf.setFont(undefined, 'bold');
+  pdf.text('ACOMPANHANTES:', 40, y);
+  pdf.setFont(undefined, 'normal');
+  pdf.text(String(guest.numAcompanhantes || 0), 115, y);
+  
+  // Data de geração
+  pdf.setFontSize(10);
+  pdf.setTextColor(127, 140, 141);
+  const now = new Date();
+  pdf.text(`Documento gerado em: ${now.toLocaleString('pt-BR')}`, 105, 250, { align: 'center' });
+  
+  // Rodapé
+  pdf.setFillColor(52, 73, 94);
+  pdf.rect(0, 270, 210, 27, 'F');
+  
+  pdf.setFontSize(10);
+  pdf.setTextColor(255, 255, 255);
+  pdf.text('RECIFE FLATS TEMPORADA | Contato: (81) 99658-6878', 105, 280, { align: 'center' });
+  pdf.text('Gestão Profissional de Apartamentos por Temporada', 105, 288, { align: 'center' });
+  
+  return pdf.output('arraybuffer');
+}
+
+async function createIntroductionPage() {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  
+  // Header
+  pdf.setFillColor(245, 248, 252);
+  pdf.rect(0, 0, 210, 40, 'F');
+  
+  pdf.setFontSize(18);
+  pdf.setTextColor(41, 128, 185);
+  pdf.text('INTRODUÇÃO', 105, 25, { align: 'center' });
+  
+  // Linha
+  pdf.setDrawColor(41, 128, 185);
+  pdf.setLineWidth(0.5);
+  pdf.line(20, 35, 190, 35);
+  
+  // Conteúdo
+  pdf.setFontSize(11);
+  pdf.setTextColor(52, 73, 94);
+  let y = 60;
+  
+  const introText = [
+    'Este documento contém toda a documentação necessária para o registro de hospedagem',
+    'no apartamento por temporada da Recife Flats Temporada, em conformidade com as',
+    'normas vigentes de hospedagem e turismo.',
+    '',
+    'ESTRUTURA DO DOCUMENTO:',
+    '',
+    '• FNRH - Ficha Nacional de Registro de Hóspedes devidamente preenchida',
+    '• Documentos pessoais do hóspede principal (RG, CPF, comprovantes)',
+    '• Formulários extras quando aplicável (liberação, termos)',
+    '• Documentação de acompanhantes (quando houver)',
+    '',
+    'FINALIDADE:',
+    '',
+    '• Cumprimento da legislação de hospedagem',
+    '• Registro oficial da estadia',
+    '• Controle de acesso e segurança',
+    '• Arquivo para fins fiscais e administrativos',
+    '',
+    'RESPONSABILIDADES:',
+    '',
+    '• Veracidade das informações fornecidas',
+    '• Apresentação de documentos originais',
+    '• Cumprimento das normas do condomínio',
+    '• Preservação do patrimônio'
+  ];
+  
+  introText.forEach(line => {
+    if (line === '') {
+      y += 4;
+    } else if (line.includes('ESTRUTURA') || line.includes('FINALIDADE') || line.includes('RESPONSABILIDADES')) {
+      pdf.setFont(undefined, 'bold');
+      pdf.setTextColor(41, 128, 185);
+      pdf.text(line, 20, y);
+      y += 8;
+      pdf.setFont(undefined, 'normal');
+      pdf.setTextColor(52, 73, 94);
+    } else {
+      pdf.text(line, 20, y);
+      y += 6;
+    }
+  });
+  
+  // Rodapé
+  pdf.setFontSize(9);
+  pdf.setTextColor(127, 140, 141);
+  pdf.text('Recife Flats Temporada - Gestão Profissional de Apartamentos', 105, 280, { align: 'center' });
+  
+  return pdf.output('arraybuffer');
+}
+
+async function createIndexPage(sections) {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  
+  // Header
+  pdf.setFillColor(245, 248, 252);
+  pdf.rect(0, 0, 210, 40, 'F');
+  
+  pdf.setFontSize(18);
+  pdf.setTextColor(41, 128, 185);
+  pdf.text('ÍNDICE', 105, 25, { align: 'center' });
+  
+  // Linha
+  pdf.setDrawColor(41, 128, 185);
+  pdf.setLineWidth(0.5);
+  pdf.line(20, 35, 190, 35);
+  
+  // Conteúdo
+  let y = 60;
+  
+  // Seções fixas
+  pdf.setFontSize(12);
+  pdf.setTextColor(52, 73, 94);
+  pdf.setFont(undefined, 'bold');
+  
+  pdf.text('CAPA', 25, y);
+  pdf.text('1', 180, y);
+  y += 10;
+  
+  pdf.text('INTRODUÇÃO', 25, y);
+  pdf.text('2', 180, y);
+  y += 10;
+  
+  pdf.text('ÍNDICE', 25, y);
+  pdf.text('3', 180, y);
+  y += 15;
+  
+  // Seções dinâmicas
+  pdf.setFont(undefined, 'normal');
+  sections.forEach(section => {
+    if (y > 250) return; // Evitar overflow
+    
+    pdf.text(section.title, 25, y);
+    pdf.text(String(section.page), 180, y);
+    
+    // Linha pontilhada
+    pdf.setDrawColor(200, 200, 200);
+    pdf.setLineWidth(0.1);
+    const titleWidth = pdf.getTextWidth(section.title);
+    const pageWidth = pdf.getTextWidth(String(section.page));
+    const startDot = 25 + titleWidth + 5;
+    const endDot = 180 - pageWidth - 5;
+    
+    for (let x = startDot; x < endDot; x += 3) {
+      pdf.circle(x, y - 1, 0.2, 'F');
+    }
+    
+    y += 8;
+  });
+  
+  return pdf.output('arraybuffer');
+}
+
+async function addSectionSeparator(mergedPDF, title) {
+  const separatorPDF = await createSectionSeparator(title);
+  const separatorDoc = await PDFLib.PDFDocument.load(separatorPDF);
+  const separatorPages = await mergedPDF.copyPages(separatorDoc, separatorDoc.getPageIndices());
+  separatorPages.forEach(page => mergedPDF.addPage(page));
+}
+
+async function createSectionSeparator(title) {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  
+  // Fundo
+  pdf.setFillColor(245, 248, 252);
+  pdf.rect(0, 0, 210, 60, 'F');
+  
+  // Título
+  pdf.setFontSize(16);
+  pdf.setTextColor(41, 128, 185);
+  pdf.text(title, 105, 35, { align: 'center' });
+  
+  // Linha decorativa
+  pdf.setDrawColor(41, 128, 185);
+  pdf.setLineWidth(2);
+  pdf.line(40, 45, 170, 45);
+  
+  // Data/hora
+  pdf.setFontSize(9);
+  pdf.setTextColor(127, 140, 141);
+  const now = new Date();
+  pdf.text(`Seção processada em: ${now.toLocaleString('pt-BR')}`, 105, 55, { align: 'center' });
+  
+  return pdf.output('arraybuffer');
+}
+
+async function addPageNumbers(pdfDoc) {
+  const pages = pdfDoc.getPages();
+  const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+  
+  pages.forEach((page, index) => {
+    const pageNumber = index + 1;
+    
+    // Não numerar capa
+    if (index === 0) return;
+    
+    const { width, height } = page.getSize();
+    
+    // Número da página no rodapé direito
+    page.drawText(`${pageNumber}`, {
+      x: width - 40,
+      y: 20,
+      size: 10,
+      font: font,
+      color: PDFLib.rgb(0.4, 0.4, 0.4)
+    });
+    
+    // Nome do documento no cabeçalho (páginas pares > 3)
+    if (pageNumber % 2 === 0 && pageNumber > 3) {
+      page.drawText('RECIFE FLATS TEMPORADA', {
+        x: 20,
+        y: height - 20,
+        size: 8,
+        font: font,
+        color: PDFLib.rgb(0.6, 0.6, 0.6)
+      });
+    }
+  });
+}
+
+// ====== FUNÇÕES AUXILIARES PDF ======
+async function appendProcessedDocuments(mergedPDF, processedDocs) {
+  let addedPages = 0;
+  
+  for (const doc of processedDocs) {
+    try {
+      const docPDF = await PDFLib.PDFDocument.load(doc.data);
+      const pages = await mergedPDF.copyPages(docPDF, docPDF.getPageIndices());
+      pages.forEach(page => mergedPDF.addPage(page));
+      addedPages += pages.length;
+    } catch (error) {
+      console.error(`Erro ao adicionar documento ${doc.name}:`, error);
+    }
+  }
+  
+  return addedPages;
+}
+
+async function countPDFPages(file) {
+  if (!file) return 0;
+  
+  try {
+    const buffer = await file.arrayBuffer();
+    const doc = await PDFLib.PDFDocument.load(buffer);
+    return doc.getPageCount();
+  } catch (error) {
+    console.error('Erro ao contar páginas:', error);
+    return 1; // Estimativa fallback
+  }
+}
+
+async function countProcessedPages(processedDocs) {
+  let totalPages = 0;
+  
+  for (const doc of processedDocs) {
+    try {
+      const pdfDoc = await PDFLib.PDFDocument.load(doc.data);
+      totalPages += pdfDoc.getPageCount();
+    } catch (error) {
+      console.error(`Erro ao contar páginas de ${doc.name}:`, error);
+      totalPages += 1; // Estimativa fallback
+    }
+  }
+  
+  return totalPages;
+}
+
+// ====== TEMPLATE FNRH ======
+function downloadFNRHTemplate() {
+  if (!state.guest.apartamento) {
+    showMessage('fnrhMessage', '⚠️ Valide os dados do hóspede primeiro!', 'warning');
+    return;
+  }
+  
+  try {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    
+    // Cabeçalho
+    pdf.setFontSize(18);
+    pdf.setTextColor(0, 100, 200);
+    pdf.text('FICHA NACIONAL DE REGISTRO DE HÓSPEDES', 105, 30, { align: 'center' });
+    
+    pdf.setFontSize(12);
+    pdf.setTextColor(100, 100, 100);
+    pdf.text('Apartamentos por Temporada', 105, 40, { align: 'center' });
+    
+    // Linha separadora
+    pdf.setLineWidth(0.5);
+    pdf.setDrawColor(0, 100, 200);
+    pdf.line(20, 45, 190, 45);
+    
+    // Campos do formulário
+    pdf.setFontSize(10);
+    pdf.setTextColor(0, 0, 0);
+    
+    let y = 60;
+    const lineHeight = 8;
+    
+    // Dados da hospedagem
+    pdf.setFontSize(12);
+    pdf.setTextColor(0, 100, 200);
+    pdf.text('DADOS DA HOSPEDAGEM', 20, y);
+    y += lineHeight + 5;
+    
+    pdf.setFontSize(10);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(`Apartamento: ${state.guest.apartamento}`, 20, y);
+    y += lineHeight;
+    
+    pdf.text('Check-in: ___/___/______', 20, y);
+    pdf.text('Check-out: ___/___/______', 120, y);
+    y += lineHeight + 10;
+    
+    // Dados pessoais
+    pdf.setFontSize(12);
+    pdf.setTextColor(0, 100, 200);
+    pdf.text('DADOS PESSOAIS', 20, y);
+    y += lineHeight + 5;
+    
+    pdf.setFontSize(10);
+    pdf.setTextColor(0, 0, 0);
+    
+    pdf.text('Nome Completo: ________________________________', 20, y);
+    y += lineHeight;
+    pdf.text('CPF: ___.___.___-__', 20, y);
+    pdf.text('RG: ________________', 120, y);
+    y += lineHeight;
+    pdf.text('Telefone: (___) _____-____', 20, y);
+    y += lineHeight;
+    pdf.text('Email: ________________________________', 20, y);
+    y += lineHeight;
+    pdf.text('Endereço: ________________________________', 20, y);
+    y += lineHeight + 15;
+    
+    // Observações
+    pdf.setFontSize(12);
+    pdf.setTextColor(0, 100, 200);
+    pdf.text('OBSERVAÇÕES', 20, y);
+    y += lineHeight + 5;
+    
+    // Linhas para observações
+    for (let i = 0; i < 5; i++) {
+      pdf.setLineWidth(0.1);
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(20, y, 190, y);
+      y += lineHeight;
+    }
+    
+    // Assinaturas
+    y += 10;
+    pdf.text('_________________________________', 30, y);
+    pdf.text('_________________________________', 120, y);
+    y += 5;
+    
+    pdf.setFontSize(9);
+    pdf.text('Assinatura do Hóspede', 30, y);
+    pdf.text('Assinatura do Responsável', 120, y);
+    
+    // Rodapé
+    y = 280;
+    pdf.setFontSize(8);
+    pdf.setTextColor(100, 100, 100);
+    const now = new Date();
+    pdf.text(`Gerado em: ${now.toLocaleString('pt-BR')}`, 105, y, { align: 'center' });
+    pdf.text(`Operador: ${state.guest.operadorNome || 'N/A'} (OP ${state.guest.operadorCodigo || ''})`, 105, y + 5, { align: 'center' });
+    
+    // Download
+    const filename = `FNRH-TEMPLATE-APT-${state.guest.apartamento}-${Date.now()}.pdf`;
+    pdf.save(filename);
+    
+    showMessage('fnrhMessage', '📥 Template FNRH baixado!', 'success');
+    
+  } catch (error) {
+    console.error('Erro ao gerar template:', error);
+    showMessage('fnrhMessage', `❌ Erro ao gerar template: ${error.message}`, 'error');
+  }
+}
+
+// ====== RENDERIZAÇÃO DE LISTAS ======
+function renderFileList(containerId, files, isSingle, onRemoveCallback) {
+  const container = byId(containerId);
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  if (!files.length) return;
+  
+  files.forEach((file, index) => {
+    const fileItem = document.createElement('div');
+    fileItem.className = 'file-item';
+    
+    const fileIcon = file.type === 'application/pdf' ? '📄' : '🖼️';
+    const fileSize = (file.size / 1024 / 1024).toFixed(2);
+    const fileType = (file.type || '').split('/')[1]?.toUpperCase() || '—';
+    const fileDate = file.lastModified ? 
+      new Date(file.lastModified).toLocaleString('pt-BR') : '—';
+    
+    fileItem.innerHTML = `
+      <div class="file-info">
+        <div class="file-name">${fileIcon} ${sanitizeFileName(file.name || 'arquivo')}</div>
+        <div class="file-details">
+          <span>📊 ${fileSize} MB</span>
+          <span>📁 ${fileType}</span>
+          <span>📅 ${fileDate}</span>
+        </div>
+      </div>
+      <div class="file-actions">
+        <button class="btn btn-danger" onclick="removeFile_${Date.now()}_${index}()" title="Remover arquivo">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    `;
+    
+    // Adicionar função de remoção ao escopo global temporariamente
+    const removeFunction = `removeFile_${Date.now()}_${index}`;
+    window[removeFunction] = () => {
+      onRemoveCallback(index);
+      delete window[removeFunction]; // Limpar função após uso
+    };
+    
+    container.appendChild(fileItem);
+  });
+}
+
+// ====== PREVIEW ======
+function updatePreview() {
+  const guest = state.guest;
+  
+  if (!guest.apartamento) {
+    byId('previewSection').style.display = 'none';
+    return;
+  }
+  
+  const filename = generateFinalFilename();
+  byId('previewFilename').textContent = filename;
+  byId('previewSection').style.display = 'block';
+}
+
+// ====== RESUMO ======
+function updateSummaryCounts() {
+  // FNRH
+  byId('summaryFNRH').textContent = state.fnrhFile ? '1' : '0';
+  
+  // Documentos principais
+  const mainDocs = state.grupos.principal.processed.length || state.grupos.principal.raw.length || 0;
+  byId('summaryDocsPrincipal').textContent = String(mainDocs);
+  
+  // Formulários
+  const formDocs = state.grupos.formularios.processed.length || state.grupos.formularios.raw.length || 0;
+  byId('summaryForm').textContent = String(formDocs);
+  
+  // Acompanhantes
+  const acompDocs = state.grupos.acompanhantes.reduce((total, acomp) => {
+    return total + (acomp.processed.length || acomp.raw.length || 0);
+  }, 0);
+  byId('summaryAcomp').textContent = String(acompDocs);
+  
+  // Habilitar/desabilitar botão de compilação
+  const hasContent = state.fnrhFile || hasAnyProcessedDocuments();
+  byId('compileFinalBtn').disabled = !hasContent;
+  
+  // Mostrar seção de resumo se há dados
+  if (hasContent || state.guest.apartamento) {
+    byId('summarySection').style.display = 'block';
+  }
+}
+
+function hasAnyProcessedDocuments() {
+  if (state.grupos.principal.processed.length > 0) return true;
+  if (state.grupos.formularios.processed.length > 0) return true;
+  if (state.grupos.acompanhantes.some(acomp => acomp.processed.length > 0)) return true;
+  return false;
+}
+
+function hasUnsavedData() {
+  if (state.fnrhFile) return true;
+  if (state.grupos.principal.raw.length > 0) return true;
+  if (state.grupos.formularios.raw.length > 0) return true;
+  if (state.grupos.acompanhantes.some(acomp => acomp.raw.length > 0)) return true;
+  if (state.finalDocument) return true;
+  return false;
+}
+
+// ====== PROGRESS E LOADING ======
+function showProgress(text, percentage) {
+  const container = byId('progressContainer');
+  const fill = byId('progressFill');
+  const textEl = byId('progressText');
+  
+  container.style.display = 'block';
+  fill.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+  textEl.textContent = text;
+}
+
+function hideProgress() {
+  byId('progressContainer').style.display = 'none';
+}
+
+function showLoadingOverlay(show) {
+  const overlay = byId('loadingOverlay');
+  overlay.style.display = show ? 'flex' : 'none';
+  
+  if (show) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
+}
+
+// ====== MENSAGENS ======
+function showMessage(elementId, message, type) {
+  const element = byId(elementId);
+  if (!element) return;
+  
+  element.textContent = message;
+  element.className = `message ${type}`;
+  element.style.display = 'block';
+  
+  // Auto-hide mensagens de sucesso
+  if (type === 'success') {
+    setTimeout(() => {
+      element.style.display = 'none';
+    }, 5000);
+  }
+}
+
+// ====== UTILITIES ======
+function byId(id) {
+  return document.getElementById(id);
+}
+
+function val(id) {
+  const element = byId(id);
+  return element ? element.value : '';
+}
+
+function sanitizeFileName(name) {
+  return String(name || '').replace(/[^a-zA-Z0-9._-]/g, '_');
+}
+
+function setCurrentMonth() {
+  const now = new Date();
+  const currentMonth = now.toISOString().slice(0, 7);
+  byId('dataEstadia').value = currentMonth;
+}
+
+function updateLastUpdate() {
+  const now = new Date();
+  const timeString = now.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  byId('lastUpdate').textContent = timeString;
+}
+
+function adjustForOrientation() {
+  // Reajustar layout após mudança de orientação
+  const cards = document.querySelectorAll('.card');
+  cards.forEach(card => {
+    card.style.minHeight = 'auto';
+  });
+}
+
+// ====== CONVERSÕES DE ARQUIVO ======
+async function fileToDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function blobToDataURL(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function loadImageFromDataUrl(dataUrl) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Falha ao carregar imagem'));
+    img.src = dataUrl;
+  });
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ====== ATALHOS DE TECLADO ======
+function handleKeyboardShortcuts(event) {
+  const isCtrlOrCmd = event.ctrlKey || event.metaKey;
+  
+  if (isCtrlOrCmd && event.key === 'r') {
+    event.preventDefault();
+    resetarSistema();
+  }
+  
+  if (isCtrlOrCmd && event.key === 'd') {
+    event.preventDefault();
+    if (state.finalDocument) {
+      baixarDocumentoFinal();
+    }
+  }
+  
+  if (isCtrlOrCmd && event.key === 's') {
+    event.preventDefault();
+    if (state.guest.apartamento) {
+      compilarDocumentoFinal();
+    }
+  }
+  
+  if (event.key === 'Escape') {
+    // Fechar overlays/modais
+    showLoadingOverlay(false);
+    
+    // Fechar menu mobile
+    const hamburger = document.querySelector('.hamburger');
+    const mobileMenu = byId('mobileMenu');
+    if (hamburger && mobileMenu) {
+      hamburger.classList.remove('active');
+      mobileMenu.classList.remove('active');
+    }
+  }
+}
+
+// ====== RESET DO SISTEMA ======
+function resetarSistema() {
+  const hasData = hasUnsavedData();
+  
+  if (hasData) {
+    const confirmReset = confirm(
+      'Tem certeza que deseja resetar todos os dados?\n\n' +
+      'Esta ação não pode ser desfeita e todos os arquivos carregados serão perdidos.'
+    );
+    
+    if (!confirmReset) return;
+  }
+  
+  try {
+    // Resetar estado
+    Object.assign(state, {
+      fnrhFile: null,
+      grupos: {
+        principal: { raw: [], processed: [] },
+        formularios: { raw: [], processed: [] },
+        acompanhantes: []
+      },
+      finalDocument: null,
+      guest: {},
+      isProcessing: false
+    });
+    
+    // Resetar formulário
+    const form = byId('hospedeForm');
+    if (form) form.reset();
+    
+    // Limpar listas de arquivos
+    ['fnrhList', 'documentList', 'formExtraList', 'acompanhantesContainer'].forEach(id => {
+      const element = byId(id);
+      if (element) element.innerHTML = '';
+    });
+    
+    // Resetar botões
+    byId('processDocuments').disabled = true;
+    byId('processFormExtras').disabled = true;
+    byId('downloadFinalBtn').style.display = 'none';
+    
+    // Ocultar seções
+    byId('previewSection').style.display = 'none';
+    byId('summarySection').style.display = 'none';
+    
+    // Limpar progresso e loading
+    hideProgress();
+    showLoadingOverlay(false);
+    
+    // Ocultar mensagens
+    document.querySelectorAll('.message').forEach(msg => {
+      msg.style.display = 'none';
+    });
+    
+    // Resetar data
+    setCurrentMonth();
+    
+    // Mostrar mensagem de confirmação
+    showMessage('dadosMessage', '🔄 Sistema resetado com sucesso.', 'success');
+    
+    console.log('✅ Sistema resetado');
+    
+  } catch (error) {
+    console.error('Erro ao resetar sistema:', error);
+    showMessage('dadosMessage', `❌ Erro ao resetar: ${error.message}`, 'error');
+  }
+}
+
+// ====== AJUDA ======
+function mostrarAjuda() {
+  const helpText = `
+📋 SISTEMA DE GESTÃO DE DOCUMENTOS - GUIA RÁPIDO
+
+🔧 COMO USAR:
+1. Preencha e valide os dados do hóspede
+2. Faça upload da FNRH (ou baixe o template)
+3. Envie documentos do hóspede principal e processe
+4. (Opcional) Envie formulários extras e processe
+5. (Opcional) Configure acompanhantes e seus documentos
+6. Compile e baixe o PDF único final
+
+📁 FORMATOS SUPORTADOS:
+• PDF, JPG, PNG, HEIC, WEBP
+• Máximo 50MB por arquivo
+• Máximo 20 arquivos por grupo
+
+📱 RECURSOS MOBILE:
+• Interface otimizada para toque
+• Drag & drop funcional
+• Botões de ação rápida (FABs)
+
+⌨️ ATALHOS:
+• Ctrl+R: Resetar sistema
+• Ctrl+D: Baixar documento final
+• Ctrl+S: Compilar documento
+• ESC: Fechar modais/menus
+
+🎯 DOCUMENTO FINAL:
+Nome: APT-[NUM]-DOCUMENTOS-[HOSPEDE]-[MES][ANO]-OP[COD].pdf
+Inclui: Capa profissional, índice, numeração de páginas
+
+✨ NOVIDADES v2025.8:
+• Suporte completo a acompanhantes
+• Interface mobile otimizada
+• Loading melhorado
+• Validações em tempo real
+`;
+
+  alert(helpText);
+}
+
+// ====== INTEGRAÇÃO OMIE ======
+function abrirOmie() {
+  window.open('https://app.omie.com.br/', '_blank');
+  showMessage('documentMessage', '🌐 Abrindo Omie...', 'success');
+}
+
+// ====== DETECÇÃO DE RECURSOS DO DISPOSITIVO ======
+function detectDeviceCapabilities() {
+  const capabilities = {
+    touch: 'ontouchstart' in window,
+    dragDrop: 'draggable' in document.createElement('div'),
+    fileApi: typeof FileReader !== 'undefined',
+    mobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  };
+  
+  console.log('📱 Capacidades do dispositivo:', capabilities);
+  
+  // Ajustar interface baseado nas capacidades
+  if (capabilities.mobile) {
+    document.body.classList.add('mobile-device');
+  }
+  
+  if (!capabilities.dragDrop) {
+    // Remover indicações de drag & drop
+    document.querySelectorAll('.upload-hint').forEach(hint => {
+      hint.textContent = hint.textContent.replace('arraste ou ', '');
+    });
+  }
+  
+  return capabilities;
+}
+
+// ====== PERFORMANCE MONITORING ======
+function monitorPerformance() {
+  if ('performance' in window) {
+    const observer = new PerformanceObserver((list) => {
+      list.getEntries().forEach((entry) => {
+        if (entry.entryType === 'measure') {
+          console.log(`⏱️ ${entry.name}: ${entry.duration.toFixed(2)}ms`);
+        }
+      });
+    });
+    
+    observer.observe({ entryTypes: ['measure'] });
+  }
+}
+
+// ====== INICIALIZAÇÃO AVANÇADA ======
+document.addEventListener('DOMContentLoaded', () => {
+  // Detectar capacidades
+  const capabilities = detectDeviceCapabilities();
+  
+  // Monitorar performance em desenvolvimento
+  if (window.location.hostname === 'localhost') {
+    monitorPerformance();
+  }
+  
+  // Verificar se o service worker está disponível (para futuras implementações)
+  if ('serviceWorker' in navigator) {
+    console.log('🔧 Service Worker disponível');
+  }
+  
+  // Otimização para dispositivos de baixa memória
+  if (navigator.deviceMemory && navigator.deviceMemory < 4) {
+    console.log('📱 Dispositivo com pouca memória detectado - ativando modo otimizado');
+    document.body.classList.add('low-memory-device');
+  }
+  
+  // Detectar conexão lenta
+  if (navigator.connection) {
+    const connection = navigator.connection;
+    if (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g') {
+      console.log('🐌 Conexão lenta detectada');
+      document.body.classList.add('slow-connection');
+    }
+  }
+});
+
+// ====== CLEANUP E MEMORY MANAGEMENT ======
+window.addEventListener('beforeunload', () => {
+  // Limpar URLs de objetos para evitar vazamentos de memória
+  if (state.finalDocument) {
+    URL.revokeObjectURL(state.finalDocument);
+  }
+  
+  // Limpar event listeners temporários
+  document.removeEventListener('click', closeMobileMenuOnClickOutside);
+});
+
+// ====== EXPOSURE GLOBAL (PARA COMPATIBILIDADE) ======
+// Expor funções necessárias globalmente para onclick handlers no HTML
+window.validarDados = validarDados;
+window.updateAcompanhantesUI = updateAcompanhantesUI;
+window.onAcompanhanteNameChange = onAcompanhanteNameChange;
+window.onAcompanhanteUpload = onAcompanhanteUpload;
+window.processarAcompanhante = processarAcompanhante;
+window.processarGrupo = processarGrupo;
+window.compilarDocumentoFinal = compilarDocumentoFinal;
+window.baixarDocumentoFinal = baixarDocumentoFinal;
+window.downloadFNRHTemplate = downloadFNRHTemplate;
+window.abrirOmie = abrirOmie;
+window.resetarSistema = resetarSistema;
+window.mostrarAjuda = mostrarAjuda;
+window.toggleMenu = toggleMenu;
+
+console.log('✅ Sistema de gestão de documentos carregado completamente!');
+console.log('📋 Versão: 2025.8 | Mobile Optimized');
+console.log('🚀 Pronto para uso!');
+
+  </script>
+
+</body>
+</html>
