@@ -1,33 +1,48 @@
 # Recife Flats — Pages
 
-Coleção de páginas estáticas do projeto **Recife Flats**.
+Catálogo de páginas estáticas do projeto **Recife Flats**.
 
 ---
 
-## 1. Página de Obrigado VIP
+<table>
+  <tr>
+    <td width="380">
+      <img src="images/01-obrigado-vip.png" width="360" alt="Obrigado VIP">
+    </td>
+    <td>
+      <h3>1. Página de Obrigado VIP</h3>
+      Página de agradecimento exibida após o cliente se cadastrar na lista de <strong>Clientes VIP</strong> (página de leads).<br><br>
+      <a href="01-obrigado-vip.html">Ver página →</a>
+    </td>
+  </tr>
+</table>
 
-Página de agradecimento exibida após o cliente se cadastrar na lista de **Clientes VIP** (página de leads).
+<br>
 
-![Obrigado VIP](images/01-obrigado-vip.png)
+<table>
+  <tr>
+    <td width="380">
+      <img src="images/02-blog-apartamentos-temporada-recife.png" width="360" alt="Blog Apartamentos">
+    </td>
+    <td>
+      <h3>2. Modelo de Página de Blog</h3>
+      Modelo base completo de página de blog para os apartamentos de temporada. Serve como referência de estrutura e layout.<br><br>
+      <a href="02-blog-apartamentos-temporada-recife.html">Ver página →</a>
+    </td>
+  </tr>
+</table>
 
-**Arquivo:** [01-obrigado-vip.html](01-obrigado-vip.html)
+<br>
 
----
-
-## 2. Modelo de Página de Blog
-
-Modelo base completo de página de blog para os apartamentos de temporada. Serve como referência de estrutura, layout e organização de conteúdo.
-
-![Blog Apartamentos Temporada](images/02-blog-apartamentos-temporada-recife.png)
-
-**Arquivo:** [02-blog-apartamentos-temporada-recife.html](02-blog-apartamentos-temporada-recife.html)
-
----
-
-## 3. Documento Compilado
-
-Página responsável por gerar um documento único em PDF. Ela reúne automaticamente identidade, CPF, formulário e demais arquivos baixados pelo usuário na aplicação, compilando tudo em um único arquivo organizado.
-
-![Documento Compilado](images/03-documento-copilado.png)
-
-**Arquivo:** [03-documento-copilado.html](03-documento-copilado.html)
+<table>
+  <tr>
+    <td width="380">
+      <img src="images/03-documento-copilado.png" width="360" alt="Documento Compilado">
+    </td>
+    <td>
+      <h3>3. Documento Compilado</h3>
+      Gera um PDF único reunindo identidade, CPF, formulário e demais arquivos baixados pelo usuário na aplicação.<br><br>
+      <a href="03-documento-copilado.html">Ver página →</a>
+    </td>
+  </tr>
+</table>
